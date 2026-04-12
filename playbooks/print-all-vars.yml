@@ -1,0 +1,11 @@
+---
+- name: Display all variables/facts known for a host
+  hosts: localhost
+  vars_files:
+    - secrets.yml
+  gather_facts: false # Set to true if you need facts as well
+  tasks:
+    - name: Display all known variables
+      ansible.builtin.debug:
+        var: hostvars[inventory_hostname]
+        verbosity: 4 # This task will only run with -vvvv or higher

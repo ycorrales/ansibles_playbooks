@@ -1,0 +1,146 @@
+---
+- name: Set Git Remote URL with Error Handling
+  hosts: sdcc_sphnx
+  vars_files:
+    - secrets.yml
+  vars:
+    repo_dest: ~/.my-dotfiles
+    remotes:
+      - name: origin
+        url: "git@github.com:{{ vault_github_user }}/my-dotfiles.git"
+      # - name: upstream
+      #   url: "https://github.com/original-org/main-repo.git"
+      # - name: backup
+      #   url: "https://github.com/backup/main-repo.git"
+  tasks:
+    - name: Check if git is installed
+      command: git --version
+      register: git_check
+      changed_when: false
+      ignore_errors: yes
+
+    - name: Fail if git not installed
+      fail:
+        msg: "Git is not installed on the remote host"
+      when: git_check is failed
+
+    - name: Check if repository exists
+      stat:
+        path: "{{ repo_dest }}/.git"
+      register: git_repo
+
+    - name: Fail if not a git repository
+      fail:
+        msg: "{{ repo_dest }} is not a valid git repository"
+      when: not git_repo.stat.exists
+
+    - name: Display all current remotes
+      command: "git -C {{ repo_dest }} remote -v"
+      register: current_remotes
+      when: git_repo.stat.exists
+      changed_when: false
+
+    - name: Show current remotes
+      debug:
+        msg: |
+          Current remotes:
+          {{ current_remotes.stdout }}
+      when: git_repo.stat.exists
+
+    # - name: Update remote URL if different
+    # block:
+    #   - name: Set new remote URL
+    #     command: "git -C {{ repo_dest }} remote set-url {{ remote_name }} {{ new_remote_url }}"
+    #     register: set_result
+    #
+    #   - name: Verify URL was updated
+    #     command: "git -C {{ repo_dest }} remote get-url {{ remote_name }}"
+    #     register: verified_url
+    #     changed_when: false
+    #
+    #   - name: Success message
+    #     debug:
+    #       msg: "✓ Remote URL successfully updated to: {{ verified_url.stdout }}"
+    #     when: verified_url.stdout == new_remote_url
+    #
+    #   - name: Failure message
+    #     fail:
+    #       msg: "Remote URL update failed. Expected: {{ new_remote_url }}, Got: {{ verified_url.stdout }}"
+    #     when: verified_url.stdout != new_remote_url
+    #
+    # when:
+    #   - current_remote.rc == 0
+    #   - current_remote.stdout != new_remote_url
+    - name: Update or add remotes
+      shell: >
+        git -C {{ repo_dest }}
+        remote set-url {{ item.name }} {{ item.url }}
+        || git -C {{ repo_dest }}
+        remote add {{ item.name }} {{ item.url }}
+      loop: "{{ remotes }}"
+      register: remote_update
+      changed_when: '"set-url" in remote_update.cmd or "remote add" in remote_update.cmd'
+
+    - name: Verify all remotes
+      command: "git -C {{ repo_dest }} remote -v"
+      register: final_remotes
+      changed_when: false
+
+    - name: Display final remotes
+      debug:
+        msg: |
+          Updated remotes:
+          {{ final_remotes.stdout }}
+
+# ---
+# - name: Manage Multiple Git Remotes
+#   hosts: single_host
+#   vars:
+#     repo_dest: /opt/my-repo
+#     remotes:
+#       - name: origin
+#         url: "https://github.com/username/main-repo.git"
+#       - name: upstream
+#         url: "https://github.com/original-org/main-repo.git"
+#       - name: backup
+#         url: "https://github.com/backup/main-repo.git"
+#
+#   tasks:
+#     - name: Verify git repository exists
+#       stat:
+#         path: "{{ repo_dest }}/.git"
+#       register: git_repo
+#
+#     - name: Display all current remotes
+#       command: "git -C {{ repo_dest }} remote -v"
+#       register: current_remotes
+#       when: git_repo.stat.exists
+#       changed_when: false
+#
+#     - name: Show current remotes
+#       debug:
+#         msg: |
+#           Current remotes:
+#           {{ current_remotes.stdout }}
+#       when: git_repo.stat.exists
+#
+#     - name: Update or add remotes
+#       command: >
+#         git -C {{ repo_dest }}
+#         remote set-url {{ item.name }} {{ item.url }}
+#         || git -C {{ repo_dest }}
+#         remote add {{ item.name }} {{ item.url }}
+#       loop: "{{ remotes }}"
+#       register: remote_update
+#       changed_when: '"set-url" in remote_update.cmd or "remote add" in remote_update.cmd'
+#
+#     - name: Verify all remotes
+#       command: "git -C {{ repo_dest }} remote -v"
+#       register: final_remotes
+#       changed_when: false
+#
+#     - name: Display final remotes
+#       debug:
+#         msg: |
+#           Updated remotes:
+#           {{ final_remotes.stdout }}

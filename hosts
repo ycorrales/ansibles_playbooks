@@ -1,0 +1,16 @@
+[lanl]
+lanl_nuc
+lanl_amber
+lanl_malta
+
+[bnl]
+sdcc_sphnx
+mvtx0.sphenix.bnl.gov
+
+[cern]
+svmithi02.cern.ch
+
+[cern:vars]
+host_key_checking = False
+ask_pass = True                    # Ask for SSH password
+ask_become_pass = True             # Ask for sudo password

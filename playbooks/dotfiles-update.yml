@@ -1,0 +1,36 @@
+---
+- name: Update Existing Git Repository
+  hosts: all
+  vars_files:
+    - secrets.yml
+  vars:
+    repo: "git@github.com:{{ vault_github_user }}/my-dotfiles.git"
+    lanl_dotfiles: "{{ 'ycorrales/' if inventory_hostname.startswith('lanl') else '' }}"
+    repo_dest: "~/{{ lanl_dotfiles }}.my-dotfiles"
+    repo_version: "main"
+
+  tasks:
+    - name: Check if repository directory exists
+      stat:
+        path: "{{ repo_dest }}"
+      register: repo_dir
+
+    - name: Fail if repository doesn't exist
+      fail:
+        msg: "Repository directory {{ repo_dest }} does not exist. Please clone it first."
+      when: not repo_dir.stat.exists
+
+    - name: Update existing repository
+      git:
+        repo: "{{ repo }}"
+        dest: "{{ repo_dest }}"
+        version: "{{ repo_version }}"
+        update: yes
+        force: no
+      when: repo_dir.stat.exists
+      register: git_result
+
+    - name: Display update result
+      debug:
+        msg: "Repository updated successfully at {{ repo_dest }}"
+      when: git_result is changed
