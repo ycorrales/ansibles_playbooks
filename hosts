@@ -5,7 +5,7 @@ lanl_malta
 
 [bnl]
 sdcc_sphnx
-mvtx0.sphenix.bnl.gov
+#mvtx0.sphenix.bnl.gov
 
 [cern]
 svmithi02.cern.ch
