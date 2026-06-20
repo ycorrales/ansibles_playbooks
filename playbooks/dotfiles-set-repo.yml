@@ -1,13 +1,15 @@
 ---
 - name: Set Git Remote URL with Error Handling
-  hosts: sdcc_sphnx
+  #hosts: sdcc_sphnx
+  hosts: all
   vars_files:
     - secrets.yml
   vars:
-    repo_dest: ~/.my-dotfiles
+    lanl_dotfiles: "{{ 'ycorrales/' if inventory_hostname.startswith('lanl') else '' }}"
+    repo_dest: "~/{{ lanl_dotfiles }}.dotfiles"
     remotes:
       - name: origin
-        url: "git@github.com:{{ vault_github_user }}/my-dotfiles.git"
+        url: "git@github.com:{{ vault_github_user }}/dotfiles.git"
       # - name: upstream
       #   url: "https://github.com/original-org/main-repo.git"
       # - name: backup

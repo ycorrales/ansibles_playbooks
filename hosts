@@ -2,7 +2,7 @@
 lanl_nuc
 lanl_amber
 lanl_malta
-lanl_flx_intel
+#lanl_flx_intel
 
 [bnl]
 sdcc_sphnx
