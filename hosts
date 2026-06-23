@@ -2,6 +2,7 @@
 lanl_nuc
 lanl_amber
 lanl_malta
+lanl_flx
 #lanl_flx_intel
 
 [bnl]
@@ -9,6 +10,7 @@ sdcc_sphnx
 #mvtx0.sphenix.bnl.gov
 
 [cern]
+mvtx.cern.ch
 svmithi02.cern.ch
 
 [cern:vars]
