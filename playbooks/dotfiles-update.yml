@@ -5,7 +5,7 @@
     - secrets.yml
   vars:
     repo: "git@github.com:{{ vault_github_user }}/dotfiles.git"
-    lanl_dotfiles: "{{ 'ycorrales/' if inventory_hostname.startswith('lanl') else '' }}"
+    lanl_dotfiles: "{{ 'ycorrales/' if inventory_hostname.startswith('lanl') and not inventory_hostname.endswith('_plm') else '' }}"
     repo_dest: "~/{{ lanl_dotfiles }}.dotfiles"
     repo_version: "main"
 
